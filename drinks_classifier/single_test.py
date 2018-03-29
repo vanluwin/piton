@@ -1,13 +1,14 @@
 import numpy as np 
+import sys
 from keras.preprocessing import image
 from keras.models import load_model 
 
-for i in range(0, 4): 
-    img = 'drink_{}.jpg'.format(i)
+if __name__ == 'main':
+    img = args[1]
     
     # Carrega a imagem 
     test_image = image.load_img(
-        'dataset/single_prediction/{}'.format(img),
+        img,
         target_size = (64, 64)
     )
 
@@ -16,7 +17,7 @@ for i in range(0, 4):
     test_image = np.expand_dims(test_image, axis = 0)
 
     # Carrega o classificador 
-    classifier = load_model('drinks.h5')
+    classifier = load_model('drinks_20e.h5')
 
     # Classifica 
     res = classifier.predict(test_image)
@@ -28,7 +29,7 @@ for i in range(0, 4):
         prediction = 'Coffee'
     elif res[0][2] > 0.95:
         prediction = 'Tea'
-    else :
+    else:
         prediction = 'Wine'
 
 
