@@ -1,9 +1,12 @@
+from os import system
 import numpy as np 
 from keras.preprocessing import image
 from keras.models import load_model 
 
 # Carrega o classificador 
-classifier = load_model('drinks.h5')
+classifier = load_model('drinks_20e.h5')
+
+system('clear')
 
 for i in range(0, 4): 
     img = 'drink_{}.jpg'.format(i)
@@ -31,5 +34,4 @@ for i in range(0, 4):
     else:
         prediction = 'Wine'
 
-
-    print('Resultado da classificação para {}: {}'.format(img, prediction))
+    print('\tResultado da classificação para {}: {}'.format(img, prediction))
