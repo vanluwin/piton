@@ -7,7 +7,7 @@ from keras.metrics import categorical_accuracy
 classifier = Sequential()
 
 # Passo 1 - Convolução
-classifier.add(Conv2D(32, (3, 3), input_shape = (128, 128, 3), padding='same', activation = 'relu'))
+classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'relu'))
 classifier.add(Conv2D(32, (3, 3), activation='relu'))
 
 # Passo 2 - Pooling 
@@ -64,14 +64,14 @@ test_data = ImageDataGenerator(
 
 training_set = train_data.flow_from_directory(
     'dataset/traning_set',
-    target_size = (128, 128),
+    target_size = (64, 64),
     batch_size = 32,
     class_mode = 'categorical'
 )
 
 test_set = test_data.flow_from_directory(
     'dataset/test_set',
-    target_size = (128, 128),
+    target_size = (64, 64),
     batch_size = 32,
     class_mode = 'categorical'
 )
@@ -88,6 +88,7 @@ history = classifier.fit_generator(
 # Salvar o modelo
 classifier.save('drinks.h5')
 
+"""
 import matplotlib.pyplot as plt
 
 # Loss Curves
@@ -107,3 +108,4 @@ plt.legend(['Training Accuracy', 'Validation Accuracy'],fontsize=18)
 plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Accuracy',fontsize=16)
 plt.title('Accuracy Curves',fontsize=16)
+"""
