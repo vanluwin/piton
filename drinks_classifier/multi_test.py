@@ -4,7 +4,7 @@ from keras.preprocessing import image
 from keras.models import load_model 
 
 # Carrega o classificador 
-classifier = load_model('drinks_20e.h5')
+classifier = load_model('results/drinks_40e.h5')
 
 system('clear')
 
@@ -31,7 +31,7 @@ for i in range(0, 4):
         prediction = 'Coffee'
     elif res[0][2] > 0.95:
         prediction = 'Tea'
-    else:
+    elif res[0][3]:
         prediction = 'Wine'
 
     print('\tResultado da classificação para {}: {}'.format(img, prediction))

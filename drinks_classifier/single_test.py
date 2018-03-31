@@ -17,7 +17,7 @@ test_image = image.img_to_array(test_image)
 test_image = np.expand_dims(test_image, axis = 0)
 
 # Carrega o classificador 
-classifier = load_model('drinks_20e.h5')
+classifier = load_model('results/drinks_20e.h5')
 
 # Classifica 
 res = classifier.predict(test_image)
