@@ -1,14 +1,15 @@
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adadelta
 from keras.metrics import categorical_accuracy
 
 # Definição do modelo
 classifier = Sequential()
 
 # Passo 1 - Convolução
-classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'relu'))
-classifier.add(Conv2D(32, (3, 3), activation='relu'))
+# "same" results in padding the input such that the output has the same length as the original input
+classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'elu'))
+classifier.add(Conv2D(32, (3, 3), activation='elu'))
 
 # Passo 2 - Pooling 
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
@@ -17,14 +18,14 @@ classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
 # Segunda camada de convolução 
-classifier.add(Conv2D(64, (3, 3),  padding='same', activation = 'relu'))
-classifier.add(Conv2D(64, (3, 3), activation='relu'))
+classifier.add(Conv2D(64, (3, 3),  padding='same', activation = 'elu'))
+classifier.add(Conv2D(64, (3, 3), activation='elu'))
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
 # Terceira camada de convolução
-classifier.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-classifier.add(Conv2D(64, (3, 3), activation='relu'))
+classifier.add(Conv2D(64, (3, 3), padding='same', activation='elu'))
+classifier.add(Conv2D(64, (3, 3), activation='elu'))
 classifier.add(MaxPooling2D(pool_size=(2, 2)))
 classifier.add(Dropout(0.25))
 
@@ -32,16 +33,20 @@ classifier.add(Dropout(0.25))
 classifier.add(Flatten())
 
 # Camda totalmente conectada 
-classifier.add(Dense(512, activation = 'relu'))
+classifier.add(Dense(512, activation = 'elu'))
 classifier.add(Dropout(0.5))
-classifier.add(Dense(units = 4, activation = 'sigmoid'))
+classifier.add(Dense(128, activation = 'elu'))
+classifier.add(Dropout(0.45))
+classifier.add(Dense(64, activation = 'elu'))
+classifier.add(Dropout(0.4))
+classifier.add(Dense(units = 4, activation = 'softmax'))
 
 gld = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 
 # Compilando a CNN
 classifier.compile(
-    optimizer = gld, 
-    loss = 'binary_crossentropy', 
+    optimizer = 'adadelta', 
+    loss = 'categorical_crossentropy', 
     #metrics = ['accuracy'])
     metrics=['accuracy', categorical_accuracy]
 )
@@ -79,16 +84,16 @@ test_set = test_data.flow_from_directory(
 # Fit the model
 history = classifier.fit_generator(
     training_set,
-    steps_per_epoch = 4000,
-    epochs = 5,
+    steps_per_epoch = len(training_set), #4233
+    epochs = 100,
     validation_data = test_set,
-    validation_steps = 2000
+    validation_steps = len(test_set) #1060
 )
 
 # Salvar o modelo
-classifier.save('drinks.h5')
+classifier.save('drinks_100e.h5')
 
-"""
+
 import matplotlib.pyplot as plt
 
 # Loss Curves
@@ -108,4 +113,5 @@ plt.legend(['Training Accuracy', 'Validation Accuracy'],fontsize=18)
 plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Accuracy',fontsize=16)
 plt.title('Accuracy Curves',fontsize=16)
-"""
+
+plt.show()
