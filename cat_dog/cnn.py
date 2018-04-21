@@ -77,10 +77,12 @@ classifier.save('catDog_10e.h5')
 # Saves the logs 
 import numpy as np
 loss_history = np.array(history.history)
-np.savetxt('loss_histoty/10e_history.txt', loss_history, delimiter = ',')
+np.savetxt('loss_history/10e_history.txt', loss_history, delimiter = ',')
 
 
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+pp = PdfPages('results/traning_10e_cpu.pdf')
 
 # Loss Curves
 plt.figure(figsize=[8,6])
@@ -90,7 +92,7 @@ plt.legend(['Training loss', 'Validation Loss'],fontsize=18)
 plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Loss',fontsize=16)
 plt.title('Loss Curves',fontsize=16)
- 
+
 # Accuracy Curves
 plt.figure(figsize=[8,6])
 plt.plot(history.history['acc'],'r',linewidth=3.0)
@@ -100,4 +102,4 @@ plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Accuracy',fontsize=16)
 plt.title('Accuracy Curves',fontsize=16)
 
-plt.show()
+plt.savefig(pp, format='pdf')
