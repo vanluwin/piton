@@ -9,8 +9,8 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 classifier = Sequential()
 
 # Step 1 - Convolution
-classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'relu'))
-classifier.add(Conv2D(32, (3, 3), activation='relu'))
+classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'elu'))
+classifier.add(Conv2D(32, (3, 3), activation='elu'))
 
 # Step 2 - Pooling
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
@@ -19,8 +19,14 @@ classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
 # Adding a second convolutional layer
-classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'relu'))
-classifier.add(Conv2D(64, (3, 3), activation='relu'))
+classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'elu'))
+classifier.add(Conv2D(64, (3, 3), activation='elu'))
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+classifier.add(Dropout(0.25))
+
+# Adding a second convolutional layer
+classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'elu'))
+classifier.add(Conv2D(64, (3, 3), activation='elu'))
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
@@ -32,7 +38,7 @@ classifier.add(Dense(units = 128, activation = 'tanh'))
 classifier.add(Dropout(0.5))
 classifier.add(Dense(64, activation='tanh'))
 classifier.add(Dropout(0.4))
-classifier.add(Dense(units = 1, activation = 'sigmoid'))
+classifier.add(Dense(units = 1, activation = 'tanh'))
 
 # Compiling the CNN
 classifier.compile(optimizer = 'adadelta', loss = 'binary_crossentropy', metrics = ['accuracy'])
@@ -63,26 +69,20 @@ test_set = test_datagen.flow_from_directory(
     class_mode = 'binary'
 )
 
+epochs = 15
+
 history = classifier.fit_generator(
     training_set,
     steps_per_epoch = 10*len(training_set),
-    epochs = 10,
+    epochs = epochs,
     validation_data = test_set,
     validation_steps = 10*len(test_set)
 )
 
 # Saves the model
-classifier.save('catDog_10e.h5')
-
-# Saves the logs 
-import numpy as np
-loss_history = np.array(history.history)
-np.savetxt('loss_history/10e_history.txt', loss_history, delimiter = ',')
-
+classifier.save('results/models/catDog_{}e.h5'.format(epochs))
 
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-pp = PdfPages('results/traning_10e_cpu.pdf')
 
 # Loss Curves
 plt.figure(figsize=[8,6])
@@ -93,6 +93,8 @@ plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Loss',fontsize=16)
 plt.title('Loss Curves',fontsize=16)
 
+plt.savefig('results/imgs/plot_loss_{}e.eps'.format(epochs))
+
 # Accuracy Curves
 plt.figure(figsize=[8,6])
 plt.plot(history.history['acc'],'r',linewidth=3.0)
@@ -102,4 +104,9 @@ plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Accuracy',fontsize=16)
 plt.title('Accuracy Curves',fontsize=16)
 
-plt.savefig(pp, format='pdf')
+plt.savefig('results/imgs/plot_acc_{}e.eps'.format(epochs))
+
+# Saves the logs 
+import numpy as np
+loss_history = np.array(history.history['loss'])
+np.savetxt('results/logs/log_loss_{}e.txt'.format(epochs), loss_history, delimiter = ',')
