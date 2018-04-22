@@ -82,6 +82,11 @@ history = classifier.fit_generator(
 # Saves the model
 classifier.save('results/models/catDog_{}e.h5'.format(epochs))
 
+# Saves the logs 
+import numpy as np
+loss_history = np.array(history.history['loss'])
+np.savetxt('results/logs/log_loss_{}e.txt'.format(epochs), loss_history, delimiter = ',')
+
 import matplotlib.pyplot as plt
 
 # Loss Curves
@@ -106,7 +111,4 @@ plt.title('Accuracy Curves',fontsize=16)
 
 plt.savefig('results/imgs/plot_acc_{}e.eps'.format(epochs))
 
-# Saves the logs 
-import numpy as np
-loss_history = np.array(history.history['loss'])
-np.savetxt('results/logs/log_loss_{}e.txt'.format(epochs), loss_history, delimiter = ',')
+
