@@ -9,8 +9,8 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 classifier = Sequential()
 
 # Step 1 - Convolution
-classifier.add(Conv2D(32, (3, 3), input_shape = (64, 64, 3), padding='same', activation = 'elu'))
-classifier.add(Conv2D(32, (3, 3), activation='elu'))
+classifier.add(Conv2D(32, (3, 3), input_shape = (128, 128, 3), padding='same', activation = 'relu'))
+classifier.add(Conv2D(32, (3, 3), activation='relu'))
 
 # Step 2 - Pooling
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
@@ -19,29 +19,29 @@ classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
 # Adding a second convolutional layer
-classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'elu'))
-classifier.add(Conv2D(64, (3, 3), activation='elu'))
+classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'relu'))
+classifier.add(Conv2D(64, (3, 3), activation='relu'))
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
 
-# Adding a second convolutional layer
-classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'elu'))
-classifier.add(Conv2D(64, (3, 3), activation='elu'))
+# Adding a third convolutional layer
+classifier.add(Conv2D(64, (3, 3), padding='same', activation = 'relu'))
+classifier.add(Conv2D(64, (3, 3), activation='relu'))
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Dropout(0.25))
-
+ 
 # Step 3 - Flattening
 classifier.add(Flatten())
 
 # Step 4 - Full connection
-classifier.add(Dense(units = 128, activation = 'tanh'))
+classifier.add(Dense(units = 512, activation = 'relu'))
 classifier.add(Dropout(0.5))
-classifier.add(Dense(64, activation='tanh'))
+classifier.add(Dense(128, activation='relu'))
 classifier.add(Dropout(0.4))
-classifier.add(Dense(units = 1, activation = 'tanh'))
+classifier.add(Dense(units = 2, activation = 'softmax'))
 
 # Compiling the CNN
-classifier.compile(optimizer = 'adadelta', loss = 'binary_crossentropy', metrics = ['accuracy'])
+classifier.compile(optimizer = 'rmsprop', loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
 # Part 2 - Fitting the CNN to the images
 from keras.preprocessing.image import ImageDataGenerator
@@ -57,26 +57,26 @@ test_datagen = ImageDataGenerator(rescale = 1./255)
 
 training_set = train_datagen.flow_from_directory(
     'dataset/training_set',
-    target_size = (64, 64),
+    target_size = (128, 128),
     batch_size = 32,
-    class_mode = 'binary'
+    class_mode = 'categorical'
 )
 
 test_set = test_datagen.flow_from_directory(
     'dataset/test_set',
-    target_size = (64, 64),
+    target_size = (128, 128),
     batch_size = 32,
-    class_mode = 'binary'
+    class_mode = 'categorical'
 )
 
 epochs = 15
 
 history = classifier.fit_generator(
     training_set,
-    steps_per_epoch = 10*len(training_set),
+    steps_per_epoch = len(training_set),
     epochs = epochs,
     validation_data = test_set,
-    validation_steps = 10*len(test_set)
+    validation_steps = len(test_set)
 )
 
 # Saves the model
