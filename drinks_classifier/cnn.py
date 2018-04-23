@@ -33,11 +33,11 @@ classifier.add(Dropout(0.25))
 classifier.add(Flatten())
 
 # Camda totalmente conectada 
-classifier.add(Dense(512, activation = 'elu'))
+classifier.add(Dense(512, activation = 'tanh'))
 classifier.add(Dropout(0.5))
-classifier.add(Dense(128, activation = 'elu'))
+classifier.add(Dense(128, activation = 'tanh'))
 classifier.add(Dropout(0.45))
-classifier.add(Dense(64, activation = 'elu'))
+classifier.add(Dense(64, activation = 'tanh'))
 classifier.add(Dropout(0.4))
 classifier.add(Dense(units = 4, activation = 'softmax'))
 
