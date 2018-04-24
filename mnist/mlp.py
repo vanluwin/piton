@@ -57,14 +57,18 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
 model = Sequential()
-model.add(Dense(512, activation='relu', input_shape=(dimData,)))
+model.add(Dense(512, activation='tanh', input_shape=(dimData,)))
 model.add(Dropout(0.5))
-model.add(Dense(512, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dense(256, activation='tanh'))
+model.add(Dropout(0.45))
+model.add(Dense(128, activation='tanh'))
+model.add(Dropout(0.4))
+model.add(Dense(64, activation='tanh'))
+model.add(Dropout(0.35))
 model.add(Dense(10, activation='softmax'))
 
 model.compile(
-    optimizer='sgd',
+    optimizer='adadelta',
     loss='categorical_crossentropy',
     metrics=['acc']
 )
@@ -75,7 +79,7 @@ epochs = 30
 history = model.fit(
     train_data,
     train_labels_one_hot,
-    batch_size = 256,
+    batch_size = 128,
     epochs = epochs,
     verbose = 1,
     validation_data = (test_data, test_labels_one_hot)
@@ -92,7 +96,7 @@ plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Loss',fontsize=16)
 plt.title('Loss Curves',fontsize=16)
 
-plt.savefig('results/img/loss_{}e.png'.format(epochs))
+plt.savefig('results/img/loss_{}_adadelta.png'.format(epochs))
 
 plt.figure(figsize=[8,6])
 plt.plot(history.history['acc'],'r',linewidth=3.0)
@@ -102,6 +106,6 @@ plt.xlabel('Epochs ',fontsize=16)
 plt.ylabel('Accuracy',fontsize=16)
 plt.title('Accuracy Curves',fontsize=16)
 
-plt.savefig('results/img/acc_{}e.png'.format(epochs))
+plt.savefig('results/img/acc_{}e_adadelta.png'.format(epochs))
 
-#plt.show()
+plt.show()
