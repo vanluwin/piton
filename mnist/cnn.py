@@ -118,7 +118,7 @@ history = model.fit_generator(
     validation_data=(test_data, test_labels_one_hot)
 )
 
-model.save('results/models/cnn_50e.h5')
+model.save('results/models/cnn_{}e.h5'.format(epochs))
 
 model.evaluate(test_data, test_labels_one_hot)
 
