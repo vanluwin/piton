@@ -73,7 +73,7 @@ model.compile(
     metrics=['acc']
 )
 
-epochs = 30
+epochs = 50
 
 # Traning the model
 history = model.fit(
