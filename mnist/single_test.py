@@ -21,9 +21,10 @@ test_image = test_image.astype('float32')
 test_image /= 255
 
 # Loads the classifier model
-classifier = load_model('results/models/cnn_100e.h5')
+classifier = load_model('results/models/cnn_30e.h5')
 
 # Predicts the label
 res = classifier.predict_classes(test_image)
 
 print(res)
+print(classifier.predict(test_image))
