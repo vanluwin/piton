@@ -12,7 +12,7 @@ import numpy as np
 
 import time
 
-class ACGAN():
+class GAN():
     def __init__(self):
         # Input shape
         self.img_rows = 28
@@ -225,5 +225,5 @@ class ACGAN():
 
 
 if __name__ == '__main__':
-    acgan = ACGAN() 
+    acgan = GAN() 
     acgan.train(epochs=14000, batch_size=32, sample_interval=200)
