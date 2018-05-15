@@ -75,25 +75,15 @@ class CNN():
 
     def train(self, epochs=1, batch_size=1):
         self.epochs = epochs
-        # Defines the Data Augmentation
-        train_datagen = ImageDataGenerator(
-            rescale = 1./255,
-            shear_range = 0.2,
-            zoom_range = 0.2,
-        )
-
-        test_datagen = ImageDataGenerator(
-            rescale = 1./255
-        )
-
-        training_set = train_datagen.flow_from_directory(
+        
+        training_set = ImageDataGenerator().flow_from_directory(
             'dataset/training_set',
             target_size = (self.img_rows, self.img_cols),
             batch_size = batch_size,
             class_mode = 'categorical'
         )
 
-        test_set = test_datagen.flow_from_directory(
+        test_set = ImageDataGenerator().flow_from_directory(
             'dataset/test_set',
             target_size = (self.img_rows, self.img_cols),
             batch_size = batch_size,
@@ -155,9 +145,12 @@ class CNN():
             fmt='%d'
         )
 
-    def save_model(self, epochs):
-        self.cnn.save('results/models/cnn_{}e.h5'.format(epochs))
+    def save_model(self):
+        self.cnn.save('results/models/cnn_{}e.h5'.format(self.epochs))
 
 if __name__ == '__main__':
     cnn = CNN()
-    cnn.train(epochs=32, batch_size=1)
+    cnn.train(epochs=10, batch_size=1)
+    cnn.save_plots()
+    cnn.save_model()
+    cnn.save_logs()
