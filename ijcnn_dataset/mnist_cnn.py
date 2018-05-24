@@ -151,6 +151,7 @@ class CNN():
 if __name__ == '__main__':
     cnn = CNN()
     cnn.train(epochs=10, batch_size=1)
-    cnn.save_plots()
     cnn.save_model()
+    cnn.save_plots()
     cnn.save_logs()
+    
