@@ -91,7 +91,7 @@ history = model.fit_generator(
 )
  
 # Save the model
-model.save('catDog_fine_tunning.h5')
+model.save('results/models/catDog_fine_tunning.h5')
 
 # Figures
 import matplotlib.pyplot as plt
