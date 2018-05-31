@@ -1,8 +1,15 @@
 from keras.datasets import cifar10
+
+from keras.regularizers import l2
+
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dropout, Dense, Flatten, BatchNormalization
+from keras.layers import Dense, Dropout, Activation, Flatten, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, AveragePooling2D
+from keras.initializers import he_normal
+
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import to_categorical
+from keras.optimizers import SGD
 
 from matplotlib import pyplot as plt
 
@@ -22,22 +29,22 @@ class CNN:
         self.input_shape = (self.img_rows, self.img_cols, self.channels)
         self.num_classes = 10
 
+        self.dropout = 0.5
+        self.weight_decay = 0.0001
+
+        # Retrieves the data
         self.get_data()
 
         # Defnes the optimizer and loss function
-        optimizer = 'rmsprop'
+        optimizer = SGD(lr=.1, momentum=0.9, nesterov=True)
         loss = ['categorical_crossentropy']
-
-        # Defining the activation functions
-        self.convActivation = 'relu'
-        self.denseActivation = 'relu'
 
         # Build and compile the NN
         self.cnn = self.build_cnn()
         self.cnn.compile(
             loss = loss,
             optimizer = optimizer,
-            metrics = ['acc']
+            metrics = ['accuracy']
         )
     
     def get_data(self):
@@ -65,36 +72,88 @@ class CNN:
         self.test_labels = test_labels_one_hot
 
     def build_cnn(self):
-        # CNN model
+        # VGG 19 Model
         model = Sequential()
         
-        model.add(Conv2D(32, (3, 3), padding='same', activation=self.convActivation, input_shape=self.input_shape))
-        model.add(Conv2D(32, (3, 3), activation=self.convActivation))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-
-        model.add(Conv2D(64, (3, 3), padding='same', activation=self.convActivation))
-        model.add(Conv2D(64, (3, 3), activation=self.convActivation))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-
-        model.add(Conv2D(64, (3, 3), padding='same', activation=self.convActivation))
-        model.add(Conv2D(64, (3, 3), activation=self.convActivation))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.25))
-
-        model.add(Flatten())
-        model.add(Dense(512, activation=self.denseActivation))
-        model.add(Dropout(0.5))
-        model.add(Dense(512, activation=self.denseActivation))
-        model.add(Dropout(0.5))
-        model.add(Dense(512, activation=self.denseActivation))
-        model.add(Dropout(0.5))
-
-        # Normalizes the network input weights between 0 and 1
+        # Block 1
+        model.add(Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block1_conv1', input_shape=(self.img_rows, self.img_cols, self.channels)))
         model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block1_conv2'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool'))
 
-        model.add(Dense(self.num_classes, activation='tanh'))
+        # Block 2
+        model.add(Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block2_conv1'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block2_conv2'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool'))
+
+        # Block 3
+        model.add(Conv2D(256, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block3_conv1'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(256, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block3_conv2'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(256, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block3_conv3'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(256, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block3_conv4'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool'))
+
+        # Block 4
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block4_conv1'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block4_conv2'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block4_conv3'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block4_conv4'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool'))
+
+        # Block 5
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block5_conv1'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block5_conv2'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block5_conv3'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Conv2D(512, (3, 3), padding='same', kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='block5_conv4'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool'))
+
+        # model modification for cifar-10
+        model.add(Flatten(name='flatten'))
+        model.add(Dense(4096, use_bias = True, kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='fc_cifa10'))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Dropout(self.dropout))
+        model.add(Dense(4096, kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='fc2'))  
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Dropout(self.dropout))      
+        model.add(Dense(self.num_classes, kernel_regularizer=l2(self.weight_decay), kernel_initializer=he_normal(), name='predictions_cifa10'))        
+        model.add(BatchNormalization())
+        model.add(Activation('softmax'))
+
+        # load pretrained weight from VGG19 by name      
+        model.load_weights('results/models/vgg19_weights.h5', by_name=True)
 
         if(self.debug):
             model.summary()
@@ -105,10 +164,11 @@ class CNN:
         self.epochs = epochs
 
         datagen = ImageDataGenerator(
-            width_shift_range=0.1,
-            height_shift_range=0.1,
             horizontal_flip=True,
-            vertical_flip=False
+            width_shift_range=0.125,
+            height_shift_range=0.125,
+            fill_mode='constant',
+            cval=0.
         )
 
         training_set = datagen.flow(
@@ -126,10 +186,12 @@ class CNN:
             validation_data = (self.test_data, self.test_labels),
             validation_steps = int(np.ceil(self.test_data.shape[0] / float(batch_size)))
         )
+        
+        end = time.time()
+
+        self.cnn.evaluate(self.test_data, self.test_labels)
 
         self.history = history
-
-        end = time.time()
 
         print("Model took %0.2f seconds to train"%(end - start))
 
@@ -177,7 +239,7 @@ class CNN:
 
 if __name__ == '__main__':
     cnn = CNN()
-    cnn.train(epochs=10, batch_size=256)
+    cnn.train(epochs=100, batch_size=128)
     cnn.save_model()
     cnn.save_plots()
     cnn.save_logs()
