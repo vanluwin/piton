@@ -3,7 +3,12 @@ from collections import deque
 import numpy as np
 from numpy import sin, cos, pi
 
-from scipy.signal import spectrogram, butter, lfilter
+from scipy.signal import stft, get_window , spectrogram, butter, lfilter
+
+from matplotlib import pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+import time
 
 class Plot():
     def __init__(self, axis, max_entries = 1000):
@@ -25,7 +30,7 @@ class Plot():
         self.axis.set_xlim(self.x_axis[0], self.x_axis[-1] + 1e-15)
         self.axis.relim(); self.axis.autoscale_view() # rescale the y-axis
 
-    def animate(self, figure, callback, interval = 50):
+    def animate(self, figure, callback, interval = 80):
         import matplotlib.animation as animation
 
         def wrapper(frame_index):
@@ -45,15 +50,17 @@ def plotFourier(plot, T, k, s, f_range):
 
     fourier = np.abs(np.fft.fft(s))
 
-    plot.clear()
+    plot.cla()
+    plot.relim(); plot.autoscale_view()
 
-    plot.set(title='PSD', xlabel='Frequency', ylabel='PSD')   
+    plot.set(title='PSD', xlabel='Frequency', ylabel='Amplitute')   
 
     plot.plot(freqs[1:f_range], 2.0/N * np.abs(fourier[:N//2])[1:f_range])
 
-def plotSpecgram(plot, T, k,  s):
-
-    f, t, Sxx = spectrogram(s, fs=int(1.0 / T), nfft=10e3)
+def plotSpecgram(fig, cax, plot, T, k,  s):
+    """
+    # First option
+    (f, t, Sxx) = spectrogram(s, fs=int(1.0 / T), window='hamming')
     
     t = np.vectorize(remap)(t, t[0], t[-1], k[0], k[-1])
     
@@ -61,10 +68,25 @@ def plotSpecgram(plot, T, k,  s):
 
     plot.set(title='Spectrogram', xlabel='Time', ylabel='Frequency', ylim=(0, 32))
 
-    plot.pcolormesh(t, f, Sxx)
+    im = plot.pcolormesh(t, f, Sxx)
     
-    #(Sxx, freqs, t, _) = plot.specgram(s, Fs=100)
+    fig.colorbar(im, cax=cax)
 
+    # Second option
+    (Sxx, freqs, t, im) = plot.specgram(s, Fs=100)
+    fig.colorbar(im, cax=cax)
+    """
+    # Third option 
+    (f, t, Zxx) = stft(s, fs=int(1.0 / T), window='hamming', nfft=256)
+    
+    t = np.vectorize(remap)(t, t[0], t[-1], k[0], k[-1])
+        
+    #plot.clear()
+ 
+    im = plot.pcolormesh(t, f, np.abs(Zxx), vmin=0, cmap='viridis')
+        
+    fig.colorbar(im, cax=cax)
+    
 def remap(x, in_min, in_max, out_min, out_max):
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
@@ -92,16 +114,18 @@ def f3(k):
     noise += 0.3 * cos(2 * pi * 50 * k)
     return  2 * sin(2* pi * 1 * k) + noise
 
-def main():
-    from matplotlib import pyplot as plt
-    
+def main():    
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(13, 5))
     fig.tight_layout(h_pad=4.0)
     axes[1, 1].remove()
     plt.subplots_adjust(top=0.929, bottom=0.117, left=0.051, right=0.98, hspace=0.48, wspace=0.123)
         
     axes[0, 0].set(title='Signal', xlabel='Time')
-
+    
+    axes[1, 0].set(title='Spectrogram', xlabel='Time', ylabel='Frequency')
+    divider = make_axes_locatable(axes[1, 0])
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    
     timePlot = Plot(axes[0, 0])
 
     start_time = np.arange(0, 10, 0.01)
@@ -112,7 +136,7 @@ def main():
     
     k = 10
     T = 0.01
-    
+
     while True:
         k = round(k + T, 2)
 
@@ -120,15 +144,14 @@ def main():
             s = f2(k)
         else:
             s = f3(k)
-            
-        
+
         timePlot.add(k, s)
-        
+
         plotFourier(axes[0, 1], T, timePlot.x_axis, timePlot.y_axis, 500)
 
-        plotSpecgram(axes[1, 0], T, timePlot.x_axis, np.asarray(timePlot.y_axis))
-        
-        plt.pause(0.0083)
+        plotSpecgram(fig, cax, axes[1, 0], T, timePlot.x_axis, np.asarray(timePlot.y_axis))
+
+        plt.pause(0.1)
     
     plt.show()
 

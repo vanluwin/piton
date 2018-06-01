@@ -3,7 +3,9 @@ from collections import deque
 import numpy as np
 from numpy import sin, cos, pi
 
-from scipy.signal import spectrogram, butter, lfilter
+from scipy.signal import stft, butter, lfilter
+
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 class Plot():
     def __init__(self, axis, max_entries = 1000):
@@ -67,42 +69,56 @@ def plotFourier(plot, T, k, s, f_range):
 
     plot.cla()
 
-    plot.set(title='PSD', xlabel='Frequency', ylabel='PSD')   
+    plot.set(title='FFT', xlabel='Frequency', ylabel='Amplitude')   
 
     plot.plot(freqs[1:f_range], 2.0/N * np.abs(fourier[:N//2])[1:f_range])
 
+def plotSpecgram(fig, cax, plot, T, k,  s):
+
+    (f, t, Zxx) = stft(s, fs=int(1.0 / T), window='hamming', nfft=256)
+    
+    t = np.vectorize(remap)(t, t[0], t[-1], k[0], k[-1])
+    Zxx = np.abs(Zxx)
+    #plot.clear()
+ 
+    im = plot.pcolormesh(t, f, Zxx, vmin=0, cmap='viridis')
+        
+    fig.colorbar(im, cax=cax)
+
+    
+def remap(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 def f(k):
     noise = sin(2 * pi * 60 * k) 
-    noise += 0.5 * cos(2 * pi * 35 * k + 0.1)
-    noise += 0.3 * cos(2 * pi * 40 * k)
-    noise += 0.3 * cos(2 * pi * 45 * k)
-    noise += 0.3 * cos(2 * pi * 50 * k)
-    return sin(2 * pi * 7 * k) + noise 
+    noise += 1.3 * cos(2 * pi * 45 * k)
+    noise += 1.3 * cos(2 * pi * 50 * k)
+    return sin(2 * pi * 1 * k) + noise 
 
 def f2(k):
     noise = sin(2 * pi * 60 * k) 
-    noise += 0.5 * cos(2 * pi * 35 * k + 0.1)
-    noise += 0.3 * cos(2 * pi * 40 * k)
-    noise += 0.3 * cos(2 * pi * 45 * k)
-    noise += 0.3 * cos(2 * pi * 50 * k)
-    return sin(2* pi * 4 * k) + noise
+    noise += 1.3 * cos(2 * pi * 45 * k)
+    noise += 1.3 * cos(2 * pi * 50 * k)
+    return sin(2* pi * 2 * k) + noise
   
 def f3(k):
-    noise = sin(2 * pi * 60 * k) 
-    noise += 0.5 * cos(2 * pi * 35 * k + 0.1)
-    noise += 0.3 * cos(2 * pi * 40 * k)
-    noise += 0.3 * cos(2 * pi * 45 * k)
-    noise += 0.3 * cos(2 * pi * 50 * k)
-    return  2 * sin(2* pi * 1 * k) + noise
+    noise = sin(2 * pi * 60 * k)
+    noise += 1.3 * cos(2 * pi * 45 * k)
+    noise += 1.3 * cos(2 * pi * 50 * k)
+    return  sin(2* pi * 3 * k) + noise
 
 def main():
     from matplotlib import pyplot as plt
     
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(13, 5))
     fig.tight_layout(h_pad=4.0)
-    plt.subplots_adjust(top=0.929, bottom=0.117, left=0.051, right=0.98, hspace=0.48, wspace=0.123)
-        
+    plt.subplots_adjust(top=0.931, bottom=0.114, left=0.045, right=0.964, hspace=0.463, wspace=0.123)
+    
     axes[0, 0].set(title='Noisy signal', xlabel='Time')
+
+    axes[0, 1].set(title='Spectrogram', xlabel='Time', ylabel='Frequency')
+    divider = make_axes_locatable(axes[0, 1])
+    cax = divider.append_axes("right", size="5%", pad=0.05)
 
     timePlot = Plot(axes[0, 0])
 
@@ -124,15 +140,14 @@ def main():
             s = f3(k)
 
         timePlot.add(k, s)
-    
-        
-        plotFourier(axes[0, 1], T, timePlot.x_axis, timePlot.y_axis, 500)
 
-        filtered_s = butter_bandpass_filter(axes[1, 0], timePlot.x_axis, timePlot.y_axis, 1, 15, 100, order=6)
+        filtered_s = butter_bandpass_filter(axes[1, 0], timePlot.x_axis, timePlot.y_axis, 1, 30, fs=int(1.0 / T), order=6)
+
+        plotSpecgram(fig, cax, axes[0, 1], T, timePlot.x_axis, filtered_s)        
 
         plotFourier(axes[1, 1], T, timePlot.x_axis, filtered_s, 300)
 
-        plt.pause(0.0083)
+        plt.pause(0.01)
     
     plt.show()
 
