@@ -163,7 +163,7 @@ def main():
     while True:
         
         k = round(k + T, 2)
-        if(k < 12):
+        if(k < 13):
             s = f2(k)
         else:
             s = f3(k)
