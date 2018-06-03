@@ -42,7 +42,7 @@ class WaveformPlot(object):
         self.lineplot, = axis.plot(self.x_axis, np.random.rand(2048), "b-")
         self.axis.set_autoscaley_on(True)
 
-    def draw(self):
+    def plot(self):
         data = self.stream.read(self.CHUNK)
         data_int = struct.unpack(str(2 * self.CHUNK) + 'B', data)
         self.signal = np.array(data_int, dtype='b')[::2] + 128
@@ -50,7 +50,6 @@ class WaveformPlot(object):
         self.lineplot.set_ydata(self.signal)
 
         self.axis.set_xlim(self.x_axis[0], self.x_axis[-1] + 1e-15)
-
 
 class FilteredPlot:
     def __init__(self, axis, max_entries = 1000):
@@ -148,13 +147,13 @@ def main():
     
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(13, 5))
     fig.tight_layout(h_pad=4.0)
-    plt.subplots_adjust(top=0.929, bottom=0.117, left=0.042, right=0.964, hspace=0.48, wspace=0.124)
+    plt.subplots_adjust(top=0.929, bottom=0.126, left=0.041, right=0.974, hspace=0.486, wspace=0.157)
 
     axes[0, 0].set(title='Audio Waveform', xlabel='Samples', yticks=[0, 128, 255], ylim=(0, 255))
     axes[1, 0].set(title='Filtered waveform', xlabel='Time')
     axes[1, 1].set(title='FFT', xlabel='Frequency', ylabel='Amplitute')
 
-    b, a = get_filter(100, 600, fs=44100, order=4)
+    b, a = get_filter(300, 600, fs=44100, order=4)
 
     waveform = WaveformPlot(axes[0, 0])
 
@@ -166,7 +165,7 @@ def main():
 
     while True:
 
-        waveform.draw()
+        waveform.plot()
 
         filteredPlot.plot_array(waveform.x_axis, lfilter(b, a, waveform.signal))
 
