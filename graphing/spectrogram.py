@@ -53,7 +53,7 @@ def plotFourier(plot, T, k, s, f_range):
     plot.cla()
     plot.relim(); plot.autoscale_view()
 
-    plot.set(title='PSD', xlabel='Frequency', ylabel='Amplitute')   
+    plot.set(title='FFT', xlabel='Frequency', ylabel='Amplitute')   
 
     plot.plot(freqs[1:f_range], 2.0/N * np.abs(fourier[:N//2])[1:f_range])
 

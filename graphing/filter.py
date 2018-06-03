@@ -67,7 +67,7 @@ def plotFourier(plot, T, k, s, f_range):
 
     plot.cla()
 
-    plot.set(title='PSD', xlabel='Frequency', ylabel='PSD')   
+    plot.set(title='FFT', xlabel='Frequency')   
 
     plot.plot(freqs[1:f_range], 2.0/N * np.abs(fourier[:N//2])[1:f_range])
 

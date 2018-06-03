@@ -100,8 +100,6 @@ class SpectrogramPlot:
  
         self.colorbar(im)
 
-        
-
 def get_filter(lowcut, highcut, fs, order=4):
     # Cutoff frequencies expressed as a fraction of the Nyquist frequency
     nyq = 0.5 * fs
