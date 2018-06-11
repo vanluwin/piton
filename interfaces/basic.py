@@ -1,7 +1,11 @@
 import sys
 from PyQt4 import QtGui, QtCore
 
+<<<<<<< HEAD
 class Window(object):
+=======
+class Window(QtGui.QMainWindow):
+>>>>>>> c935633522c9b5a0dac2bcf453178c81f819fdda
     
     def __init__(self):
         super(Window, self).__init__()
@@ -115,7 +119,10 @@ class Window(object):
         text = self.textEdit.toPlainText()
         file.write(text)
         file.close()
+<<<<<<< HEAD
    
+=======
+>>>>>>> c935633522c9b5a0dac2bcf453178c81f819fdda
     def editor(self):
         self.textEdit = QtGui.QTextEdit()
         self.setCentralWidget(self.textEdit)
