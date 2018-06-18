@@ -43,10 +43,11 @@ class FourierPlot:
     """
     Creates a canvas for plotting a signal in frequency
     """
-    def __init__(self, axis, spacing, f_range):
+    def __init__(self, axis, spacing, f_range_low, f_range_high):
         self.axis = axis
         self.T = spacing
-        self.f_range = f_range * 10
+        self.f_range_low = f_range_low
+        self.f_range_high = f_range_high * 10
 
         self.lineplot, = axis.plot([], [], "b-")
         self.axis.grid()
@@ -54,10 +55,10 @@ class FourierPlot:
         
     def plot(self, time, signal):
         freqs = np.fft.fftfreq(1000, self.T)
-        freqs = freqs[1:self.f_range]
+        freqs = freqs[self.f_range_low:self.f_range_high]
 
         fourier = np.abs(np.fft.fft(signal))
-        fourier = 2.0/1e3 * np.abs(fourier[:1000//2])[1:self.f_range]
+        fourier = 2.0/1e3 * np.abs(fourier[:1000//2])[self.f_range_low:self.f_range_high]
 
         self.lineplot.set_data(freqs, fourier)
         self.axis.relim(); self.axis.autoscale_view() # rescale the y-axis
@@ -66,11 +67,12 @@ class SpectrogramPlot:
     """
     Creates a canvas for plotting the spectrogram of a signal
     """
-    def __init__(self, fig, axis, spacing, f_range):
+    def __init__(self, fig, axis, spacing, f_range_low, f_range_high):
         self.fig = fig
         self.axis = axis
         self.T = spacing
-        self.f_range = f_range
+        self.f_range_high = f_range_high
+        self.f_range_low = f_range_low
 
         self.cbar = False
 
@@ -97,7 +99,7 @@ class SpectrogramPlot:
 
         self.axis.clear()
 
-        self.axis.set(title='Spectrogram', xlabel='Time', ylabel='Frequency', ylim=(0, self.f_range))
+        self.axis.set(title='Spectrogram', xlabel='Time', ylabel='Frequency', ylim=(self.f_range_low, self.f_range_high))
 
         im = self.axis.pcolor(t, f, Zxx)
 
